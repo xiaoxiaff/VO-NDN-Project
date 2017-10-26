@@ -17,13 +17,8 @@
  *
  * See AUTHORS.md for complete list of ndnabacdaemon authors and contributors.
  */
-#ifndef NDNABACDAEMON_SRC_NDNABACDAEMON_COMMON_HPP
-#define NDNABACDAEMON_SRC_NDNABACDAEMON_COMMON_HPP
-
-namespace ndn {
-namespace ndnabacdaemon {
- 
-} // namespace ndnabacdaemon
-} // namespace ndn
-
-#endif // NDNABACDAEMON_SRC_NDNABACDAEMON_COMMON_HPP
+int
+main(int argc, char** argv)
+{
+	return 0;
+}

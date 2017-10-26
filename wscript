@@ -27,6 +27,9 @@ def configure(conf):
     conf.check_cfg(package='libndn-cxx', args=['--cflags', '--libs'],
                    uselib_store='NDN_CXX', mandatory=True)
 
+    conf.check_cfg(package='libndn-abac', args=['--cflags', '--libs'],
+                   uselib_store='NDN_ABAC', mandatory=True)
+
     USED_BOOST_LIBS = ['system', 'filesystem', 'iostreams',
                        'program_options', 'thread', 'log', 'log_setup']
 
@@ -73,37 +76,30 @@ def configure(conf):
 
 def build(bld):
     core = bld(
-        target = "ndn-abac",
-        features=['cxx', 'cxxshlib'],
-        source =  bld.path.ant_glob(['src/**/*.cpp', 'src/**/*.c']),
-        vnum = VERSION,
-        cnum = VERSION,
-        use = 'NDN_CXX BOOST GMP GLIB PBC BSWABE',
-        includes = ['src'],
-        export_includes=['src'],
-    )
+        target='core-objects',
+        name='core-objects',
+        features='cxx',
+        source=bld.path.ant_glob(['daemon/*.cpp']),
+        use='version NDN_CXX NDN_ABAC BOOST LIBRT',
+        includes='. core',
+        export_includes='.',
+        headers='daemon/common.hpp')
+
+    attribute_authority_objects = bld(
+        target='attribute_authority-objects',
+        name='attribute_authority-objects',
+        features='cxx',
+        source=bld.path.ant_glob(['daemon/Attribute_Authority/*.cpp'],
+                                 excl=['daemon/Attribute_Authority/main.cpp']),
+        use='core-objects',
+        includes='daemon')
+
+    attribute_authority = bld(
+        target='bin/attribute_authority',
+        name='attribute_authority',
+        features='cxx cxxprogram',
+        source=bld.path.ant_glob(['daemon/Attribute_Authority/main.cpp']),
+        use='attribute_authority-objects',
+        includes='daemon')
 
     bld.recurse('tests')
-
-    bld.install_files(
-        dest = "%s/ndnabac" % bld.env['INCLUDEDIR'],
-        files = bld.path.ant_glob(['src/**/*.hpp', 'src/**/*.h']),
-        cwd = bld.path.find_dir("src"),
-        relative_trick = True,
-        )
-
-    bld.install_files(
-        dest = "%s/ndnabac" % bld.env['INCLUDEDIR'],
-        files = bld.path.get_bld().ant_glob(['src/**/*.hpp']),
-        cwd = bld.path.get_bld().find_dir("src"),
-        relative_trick = False,
-        )
-
-    bld(features = "subst",
-        source='libndn-abac.pc.in',
-        target='libndn-abac.pc',
-        install_path = '${LIBDIR}/pkgconfig',
-        PREFIX       = bld.env['PREFIX'],
-        INCLUDEDIR   = "%s/ndnabac" % bld.env['INCLUDEDIR'],
-        VERSION      = VERSION,
-        )

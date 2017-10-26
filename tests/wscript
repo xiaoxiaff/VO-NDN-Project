@@ -1,0 +1,7 @@
+
+top = '..'
+
+def build(bld):
+    # Unit tests
+    if bld.env['WITH_TESTS']:
+    	print "test"
