@@ -1,0 +1,8 @@
+prefix=@PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: ndn-abac-daemon
+Description: ndn-abac daemon
+Version: @VERSION@
+Cflags: -I${includedir}
