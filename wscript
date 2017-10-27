@@ -80,7 +80,7 @@ def build(bld):
         name='core-objects',
         features='cxx',
         source=bld.path.ant_glob(['daemon/*.cpp']),
-        use='version NDN_CXX NDN_ABAC BOOST LIBRT',
+        use='version NDN_CXX NDN_ABAC BOOST LIBRT PBC GLIB',
         includes='. core',
         export_includes='.',
         headers='daemon/common.hpp')
@@ -89,8 +89,8 @@ def build(bld):
         target='attribute_authority-objects',
         name='attribute_authority-objects',
         features='cxx',
-        source=bld.path.ant_glob(['daemon/Attribute_Authority/*.cpp'],
-                                 excl=['daemon/Attribute_Authority/main.cpp']),
+        source=bld.path.ant_glob(['daemon/AttributeAuthority/*.cpp'],
+                                 excl=['daemon/AttributeAuthority/main.cpp']),
         use='core-objects',
         includes='daemon')
 
@@ -98,7 +98,7 @@ def build(bld):
         target='bin/attribute_authority',
         name='attribute_authority',
         features='cxx cxxprogram',
-        source=bld.path.ant_glob(['daemon/Attribute_Authority/main.cpp']),
+        source=bld.path.ant_glob(['daemon/AttributeAuthority/main.cpp']),
         use='attribute_authority-objects',
         includes='daemon')
 

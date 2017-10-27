@@ -17,13 +17,8 @@
  *
  * See AUTHORS.md for complete list of ndnabacdaemon authors and contributors.
  */
-#ifndef NDNABACDAEMON_SRC_ATTRIBUTE_AUTHORITY_HPP
-#define NDNABACDAEMON_SRC_ATTRIBUTE_AUTHORITY_HPP
-
 namespace ndn {
 namespace ndnabacdaemon {
  
 } // namespace ndnabacdaemon
 } // namespace ndn
-
-#endif // NDNABACDAEMON_SRC_ATTRIBUTE_AUTHORITY_HPP

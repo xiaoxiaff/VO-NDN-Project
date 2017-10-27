@@ -7,3 +7,4 @@ build/
 VERSION
 .waf-tools/*
 .waf-tools/*.pyc
+docs/.DS_Store

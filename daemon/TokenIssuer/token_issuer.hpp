@@ -17,8 +17,8 @@
  *
  * See AUTHORS.md for complete list of ndnabacdaemon authors and contributors.
  */
-#ifndef NDNABACDAEMON_SRC_DATA_OWNER_HPP
-#define NDNABACDAEMON_SRC_DATA_OWNER_HPP
+#ifndef NDNABACDAEMON_SRC_TOKENISSUER_TOKEN_ISSUER_HPP
+#define NDNABACDAEMON_SRC_TOKENISSUER_TOKEN_ISSUER_HPP
 
 namespace ndn {
 namespace ndnabacdaemon {
@@ -26,4 +26,4 @@ namespace ndnabacdaemon {
 } // namespace ndnabacdaemon
 } // namespace ndn
 
-#endif // NDNABACDAEMON_SRC_DATA_OWNER_HPP
+#endif // NDNABACDAEMON_SRC_TOKENISSUER_TOKEN_ISSUER_HPP
