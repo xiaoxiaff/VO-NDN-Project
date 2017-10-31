@@ -83,23 +83,30 @@ def build(bld):
         use='version NDN_CXX NDN_ABAC BOOST LIBRT PBC GLIB',
         includes='. core',
         export_includes='.',
-        headers='daemon/common.hpp')
-
-    attribute_authority_objects = bld(
-        target='attribute_authority-objects',
-        name='attribute_authority-objects',
-        features='cxx',
-        source=bld.path.ant_glob(['daemon/AttributeAuthority/*.cpp'],
-                                 excl=['daemon/AttributeAuthority/main.cpp']),
-        use='core-objects',
-        includes='daemon')
+        headers='daemon/ndnabacdaemon-common.hpp')
 
     attribute_authority = bld(
         target='bin/attribute_authority',
         name='attribute_authority',
         features='cxx cxxprogram',
         source=bld.path.ant_glob(['daemon/AttributeAuthority/main.cpp']),
-        use='attribute_authority-objects',
+        use='core-objects',
+        includes='daemon')
+
+    consumer = bld(
+        target='bin/consumer',
+        name='consumer',
+        features='cxx cxxprogram',
+        source=bld.path.ant_glob(['daemon/Consumer/main.cpp']),
+        use='core-objects',
+        includes='daemon')
+
+    token_issuer = bld(
+        target='bin/token_issuer',
+        name='token_issuer',
+        features='cxx cxxprogram',
+        source=bld.path.ant_glob(['daemon/TokenIssuer/main.cpp']),
+        use='core-objects',
         includes='daemon')
 
     bld.recurse('tests')
