@@ -116,4 +116,12 @@ def build(bld):
         source=bld.path.ant_glob(['daemon/DataOwner/main.cpp']),
         use='core-objects',
         includes='daemon')
+
+    producer = bld(
+        target='bin/producer',
+        name='producer',
+        features='cxx cxxprogram',
+        source=bld.path.ant_glob(['daemon/Producer/main.cpp']),
+        use='core-objects',
+        includes='daemon')
     bld.recurse('tests')
