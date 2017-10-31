@@ -109,4 +109,11 @@ def build(bld):
         use='core-objects',
         includes='daemon')
 
+    data_owner = bld(
+        target='bin/data_owner',
+        name='data_owner',
+        features='cxx cxxprogram',
+        source=bld.path.ant_glob(['daemon/DataOwner/main.cpp']),
+        use='core-objects',
+        includes='daemon')
     bld.recurse('tests')

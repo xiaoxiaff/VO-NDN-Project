@@ -17,8 +17,114 @@
  *
  * See AUTHORS.md for complete list of ndnabacdaemon authors and contributors.
  */
+
+#include <boost/asio/io_service.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <ndnabac/data-owner.hpp>
+
+#include "abac-identity.hpp"
+#include "ndnabacdaemon-common.hpp"
+
+void
+printUsage(std::ostream& os, const std::string& programName)
+{
+  os << "Usage: \n"
+     << "  " << programName << " [options]\n"
+     << "\n"
+     << "VO-NDN daemon\n"
+     << "\n"
+     << "Options:\n"
+     << "  [--help]    - print this help message\n"
+     << "  [--name]    - assign the data owner name"
+     << "(default: " << "/dataOwnerPrefix" << ")\n"
+     << "  [--config] - path to producer policy\n"
+     ;
+}
+
 int
 main(int argc, char** argv)
 {
+  namespace po = boost::program_options;
+
+  po::options_description description;
+
+  std::string dataOwnerName = "/dataOwnerPrefix";
+  std::string configFile;
+  description.add_options()
+    ("help,h", "print this help message")
+    ("name,n", po::value<std::string>(&dataOwnerName), "Data Owner Name")
+    ("config,c",  po::value<std::string>(&configFile), "path to producer policy file")
+    ;
+
+  po::variables_map vm;
+  try {
+    po::store(po::command_line_parser(argc, argv).options(description).run(), vm);
+    po::notify(vm);
+  }
+  catch (const std::exception& e) {
+    // avoid NFD_LOG_FATAL to ensure that errors related to command-line parsing always appear on the
+    // terminal and are not littered with timestamps and other things added by the logging subsystem
+    std::cerr << "ERROR: " << e.what() << std::endl;
+    printUsage(std::cerr, argv[0]);
+    return 1;
+  }
+
+  if (vm.count("help") > 0) {
+    printUsage(std::cout, argv[0]);
+    return 0;
+  }
+	std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
+	std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
+	ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
+	// set up AA
+  ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(dataOwnerName, keyChain);
+  ndn::security::Key key = identity.getDefaultKey();
+  ndn::security::v2::Certificate cert = key.getDefaultCertificate();
+  ndn::ndnabac::DataOwner dataOwner(cert, *face, keyChain);
+
+  // Import config for data owner.
+  std::string line;
+  std::ifstream policyConfig(configFile);
+  if (policyConfig.is_open())
+  {
+  	while (getline(policyConfig, line))
+  	{
+  		std::size_t pos = line.find("producer:");
+  		if (pos == std::string::npos) {		
+		    std::cerr << "ERROR: " << "config format error" << std::endl;
+		    return 1;
+  		}
+  		ndn::Name producerName = line.substr(pos+1);
+  		getline(policyConfig, line);
+  		pos = line.find(",");
+  		if (pos == std::string::npos) {		
+		    std::cerr << "ERROR: " << "config format error" << std::endl;
+		    return 1;
+  		}
+
+  		ndn::Name dataName = line.substr(0, pos);
+  		std::string policy = line.substr(pos+1);
+
+		  bool isPolicySet = false;
+		  dataOwner.commandProducerPolicy(producerName, dataName, policy,
+		                                   [&] (const ndn::Data& response) {
+		                                     isPolicySet = true;
+		                                   },
+		                                   [=] (const std::string& err) {});
+		  if (!isPolicySet)
+		  {
+		    std::cerr << "ERROR: " << "set policy for producer:" << producerName
+		              << "failed" << std::endl;
+		    return 1;
+		  }
+  	}
+  } else {
+    std::cerr << "ERROR: " << "config doesn't exist" << std::endl;
+    printUsage(std::cerr, argv[0]);
+    return 1;
+  }
+  policyConfig.close();
 	return 0;
 }

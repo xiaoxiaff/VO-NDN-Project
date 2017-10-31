@@ -41,8 +41,8 @@ printUsage(std::ostream& os, const std::string& programName)
      << "Options:\n"
      << "  [--help]    - print this help message\n"
      << "  [--name]    - assign the token issuer name"
-     << "(default: " << "/consumerPrefix" << ")\n"
-     << "  [--config /path/to/nfd.conf] - path to attribute file\n"
+     << "(default: " << "/tokenIssuerPrefix" << ")\n"
+     << "  [--config] - path to attribute file\n"
      ;
 }
 
