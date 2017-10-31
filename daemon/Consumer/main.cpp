@@ -23,6 +23,7 @@
 #include <boost/program_options/variables_map.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <ndnabac/consumer.hpp>
+#include <ndn-cxx/util/io.hpp>
 
 #include "abac-identity.hpp"
 #include "ndnabacdaemon-common.hpp"
@@ -37,8 +38,10 @@ printUsage(std::ostream& os, const std::string& programName)
      << "\n"
      << "Options:\n"
      << "  [--help]    - print this help message\n"
-     << "  [--name]    - assign the consumer name\n"
+     << "  [--name]    - assign the consumer name"
      << "(default: " << "/consumerPrefix" << ")\n"
+     << "  [--path]    - path to the certificate"
+     << "(default: " << "./%consumerPrefix%/cert" << ")\n"
      ;
 }
 
@@ -50,9 +53,11 @@ main(int argc, char** argv)
   po::options_description description;
 
   std::string consumerName = "/consumerPrefix";
+  std::string pathToCert = "."+consumerName+"/cert";
   description.add_options()
     ("help,h", "print this help message")
     ("name,n", po::value<std::string>(&consumerName), "Consumer Name")
+    ("path,p", po::value<std::string>(&pathToCert), "Consumer Name")
     ;
 
   po::variables_map vm;
@@ -79,6 +84,11 @@ main(int argc, char** argv)
   ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(consumerName, keyChain);
   ndn::security::Key key = identity.getDefaultKey();
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
+
+
+  std::ofstream certFile(pathToCert);
+  ndn::io::save(cert, certFile);
+  certFile.close();
   ndn::ndnabac::Consumer consumer(cert, *face, keyChain, ndn::Name(consumerName));
 	return 0;
 }
