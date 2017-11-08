@@ -25,8 +25,11 @@
 #include <ndnabac/consumer.hpp>
 #include <ndn-cxx/util/io.hpp>
 
+#include <thread>
+
 #include "abac-identity.hpp"
 #include "ndnabacdaemon-common.hpp"
+#include "io-service-manager.hpp"
 
 void
 printUsage(std::ostream& os, const std::string& programName)
@@ -54,10 +57,12 @@ main(int argc, char** argv)
 
   std::string consumerName = "/consumerPrefix";
   std::string pathToCert = "."+consumerName+"/cert";
+  std::string tokenIssuerName = "/tokenIssuerPrefix";
   description.add_options()
     ("help,h", "print this help message")
     ("name,n", po::value<std::string>(&consumerName), "Consumer Name")
-    ("path,p", po::value<std::string>(&pathToCert), "Consumer Name")
+    ("path,p", po::value<std::string>(&pathToCert), "Path to Cert")
+    ("tokenIssuerName,t", po::value<std::string>(&tokenIssuerName), "Token Issuer Name")
     ;
 
   po::variables_map vm;
@@ -77,8 +82,8 @@ main(int argc, char** argv)
     printUsage(std::cout, argv[0]);
     return 0;
   }
-	std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
-	std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
+	std::unique_ptr<boost::asio::io_service> ioService(new boost::asio::io_service);
+	std::unique_ptr<ndn::Face> face(new ndn::Face(*ioService));
 	ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
 	// set up AA
   ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(consumerName, keyChain);
@@ -90,5 +95,38 @@ main(int argc, char** argv)
   ndn::io::save(cert, certFile);
   certFile.close();
   ndn::ndnabac::Consumer consumer(cert, *face, keyChain, ndn::Name(consumerName));
+  
+  ndn::ndnabacdaemon::IoServiceManager* ioServiceManager = new ndn::ndnabacdaemon::IoServiceManager(*ioService);
+  try {
+    std::thread m_NetworkThread =
+        std::thread(&ndn::ndnabacdaemon::IoServiceManager::run, ioServiceManager);
+    std::string line;
+    while(std::getline(std::cin, line)) {
+      if (line == "quit") {
+        return 1;
+      }
+      std::size_t pos = line.find(",");
+      if (pos == std::string::npos) {   
+        std::cerr << "ERROR: " << "config format error" << std::endl;
+        return 1;
+      }
+      ndn::Name producerName = line.substr(0, pos);
+      ndn::Name dataName = line.substr(pos+1);
+      consumer.consume(producerName.append(dataName), tokenIssuerName, 
+        [&] (const Buffer& result) {
+          std::string str;
+          for(int i =0;i<sizeof(PLAIN_TEXT);++i)
+            str.push_back(result[i]);
+        },
+        [&] (const std::string& err) {
+          std::cout << "error occurred" << err << std::endl;
+      });
+
+    }
+  }
+  catch (const std::exception& e) {
+    std::cout << "Start IO service or Face failed" << std::endl;
+    return 1;
+  }
 	return 0;
 }
