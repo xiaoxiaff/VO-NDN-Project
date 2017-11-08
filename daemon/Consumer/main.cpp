@@ -113,9 +113,9 @@ main(int argc, char** argv)
       ndn::Name producerName = line.substr(0, pos);
       ndn::Name dataName = line.substr(pos+1);
       consumer.consume(producerName.append(dataName), tokenIssuerName, 
-        [&] (const Buffer& result) {
+        [&] (const ndn::Buffer& result) {
           std::string str;
-          for(int i =0;i<sizeof(PLAIN_TEXT);++i)
+          for(int i =0;i<sizeof(result);++i)
             str.push_back(result[i]);
         },
         [&] (const std::string& err) {

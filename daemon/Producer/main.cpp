@@ -85,7 +85,10 @@ main(int argc, char** argv)
   std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
   std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
   ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
-
+  ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(producerName, keyChain);
+  ndn::security::Key key = identity.getDefaultKey();
+  ndn::security::v2::Certificate cert = key.getDefaultCertificate();
+  ndn::ndnabac::Producer producer(cert, *face, keyChain, ndn::Name(aaName));
   // Import config for data owner.
   std::string line;
   std::ifstream policyConfig(configFile);
@@ -100,19 +103,18 @@ main(int argc, char** argv)
       }
       ndn::Name dataName = line.substr(0, pos);
       std::string filePath = line.substr(pos+1);
-      producerFace.setInterestFilter(producerCert.getIdentity().append(dataName),
+      face->setInterestFilter(ndn::Name(producerName).append(dataName),
         [&] (const ndn::InterestFilter&, const ndn::Interest& interest) {
           std::ifstream inputFile(filePath);
 
           if (inputFile.is_open()) {
             std::string content((std::istreambuf_iterator<char>(inputFile)),
                                 (std::istreambuf_iterator<char>()));
-            producer.produce(dataName, content.c_str(), sizeof(content.c_str()),
-            [&] (const Data& data) {
-              isProdCbCalled = true;
+            producer.produce(dataName, "", reinterpret_cast<const uint8_t*>(content.data()), content.size(),
+            [&] (const ndn::Data& data) {
 
-              NDN_LOG_INFO("data successfully encrypted");
-              producerFace.put(data);
+              std::cout << "data successfully encrypted" << std::endl;
+              face->put(data);
             },
             [&] (const std::string& err) {
               std::cout << err << std::endl;
@@ -129,10 +131,7 @@ main(int argc, char** argv)
   }
   policyConfig.close();
 	// set up AA
-  ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(producerName, keyChain);
-  ndn::security::Key key = identity.getDefaultKey();
-  ndn::security::v2::Certificate cert = key.getDefaultCertificate();
-  ndn::ndnabac::Producer producer(cert, *face, keyChain, ndn::Name(aaName));
+
   try {
     boost::asio::io_service::work ioServiceWork(*io_service);
     io_service->run();
