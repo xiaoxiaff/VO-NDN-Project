@@ -28,6 +28,7 @@
 
 #include "abac-identity.hpp"
 #include "ndnabacdaemon-common.hpp"
+#include "io-service-manager.hpp"
 
 void
 printUsage(std::ostream& os, const std::string& programName)
@@ -84,5 +85,13 @@ main(int argc, char** argv)
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
 
   ndn::ndnabac::AttributeAuthority aa(cert, *face, keyChain);
+  try {
+    boost::asio::io_service::work ioServiceWork(*io_service);
+    io_service->run();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Start IO service or Face failed" << std::endl;
+    return 1;
+  }
   return 0;
 }
