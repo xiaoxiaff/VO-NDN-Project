@@ -106,7 +106,6 @@ main(int argc, char** argv)
 
   		ndn::Name dataName = line.substr(0, pos);
   		std::string policy = line.substr(pos+1);
-
 		  bool isPolicySet = false;
 		  dataOwner.commandProducerPolicy(producerName, dataName, policy,
 		                                   [&] (const ndn::Data& response) {
