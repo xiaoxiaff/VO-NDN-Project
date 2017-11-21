@@ -91,13 +91,16 @@ main(int argc, char** argv)
   ndn::ndnabac::Producer producer(cert, *face, keyChain, ndn::Name(aaName));
   // Import config for data owner.
   std::string line;
+
+  std::cout << configFile << std::endl;
+
   std::ifstream policyConfig(configFile);
   if (policyConfig.is_open())
   {
     while (getline(policyConfig, line))
     {
       std::size_t pos = line.find(",");
-      if (pos == std::string::npos) {   
+      if (pos == std::string::npos) {
         std::cerr << "ERROR: " << "config format error" << std::endl;
         return 1;
       }

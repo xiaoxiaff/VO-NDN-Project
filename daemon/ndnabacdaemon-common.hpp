@@ -20,9 +20,11 @@
 #ifndef NDNABACDAEMON_DAEMON_COMMON_HPP
 #define NDNABACDAEMON_DAEMON_COMMON_HPP
 
+#include <iostream>
+
 namespace ndn {
 namespace ndnabacdaemon {
- 
+
 } // namespace ndnabacdaemon
 } // namespace ndn
 
