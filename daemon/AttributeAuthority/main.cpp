@@ -42,13 +42,13 @@ printUsage(std::ostream& os, const std::string& programName)
      << "  [--help]    - print this help message\n"
      << "  [--name]    - assign the attribute authority name\n"
      << "(default: " << "/aaPrefix" << ")\n"
-     ;
+    ;
 }
 
 int
 main(int argc, char** argv)
 {
-	namespace po = boost::program_options;
+  namespace po = boost::program_options;
 
   po::options_description description;
 
@@ -76,17 +76,23 @@ main(int argc, char** argv)
     return 0;
   }
 
-	std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
-	std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
-	ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
-	// set up AA
+  std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
+  std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
+  ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
+  // set up AA
   ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(aaName, keyChain);
   ndn::security::Key key = identity.getDefaultKey();
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
 
   ndn::ndnabac::AttributeAuthority aa(cert, *face, keyChain);
+
+  std::cout << "before io service" << std::endl;
+
   try {
     boost::asio::io_service::work ioServiceWork(*io_service);
+
+    std::cout << "before run" << std::endl;
+
     io_service->run();
   }
   catch (const std::exception& e) {
