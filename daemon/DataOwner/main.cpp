@@ -39,7 +39,7 @@ printUsage(std::ostream& os, const std::string& programName)
      << "  [--help]    - print this help message\n"
      << "  [--name]    - assign the data owner name"
      << "(default: " << "/dataOwnerPrefix" << ")\n"
-     << "  [--config] - path to producer policy\n"
+     << "  [--config] - path to producer policy file\n"
      ;
 }
 
@@ -92,15 +92,15 @@ main(int argc, char** argv)
   	while (getline(policyConfig, line))
   	{
   		std::size_t pos = line.find("producer:");
-  		if (pos == std::string::npos) {		
-		    std::cerr << "ERROR: " << "config format error" << std::endl;
+  		if (pos == std::string::npos) {	
+		    std::cerr << "ERROR: " << "config producer format error" << std::endl;
 		    return 1;
   		}
-  		ndn::Name producerName = line.substr(pos+1);
+  		ndn::Name producerName = line.substr(pos+strlen("producer:"));
   		getline(policyConfig, line);
   		pos = line.find(",");
   		if (pos == std::string::npos) {		
-		    std::cerr << "ERROR: " << "config format error" << std::endl;
+		    std::cerr << "ERROR: " << "config policy format error" << std::endl;
 		    return 1;
   		}
 

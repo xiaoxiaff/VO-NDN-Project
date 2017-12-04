@@ -5,6 +5,7 @@
 **/*.pyc
 build/
 VERSION
+.waf-tools/boost.pyc
 .waf-tools/*
 .waf-tools/*.pyc
 docs/.DS_Store

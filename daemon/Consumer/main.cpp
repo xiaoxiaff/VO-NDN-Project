@@ -121,7 +121,6 @@ main(int argc, char** argv)
         [&] (const std::string& err) {
           std::cout << "error occurred" << err << std::endl;
       });
-
     }
   }
   catch (const std::exception& e) {
