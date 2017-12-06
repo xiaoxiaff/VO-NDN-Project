@@ -110,14 +110,9 @@ main(int argc, char** argv)
 		  dataOwner.commandProducerPolicy(producerName, dataName, policy,
 		                                   [&] (const ndn::Data& response) {
 		                                     isPolicySet = true;
+                                         std::cout<<"set policy:"<<policy<<"successfully"<<std::endl;
 		                                   },
-		                                   [=] (const std::string& err) {});
-		  if (!isPolicySet)
-		  {
-		    std::cerr << "ERROR: " << "set policy for producer:" << producerName
-		              << "failed" << std::endl;
-		    return 1;
-		  }
+		                                   [=] (const std::string& err) {std::cout<<err<<std::endl;});
   	}
   } else {
     std::cerr << "ERROR: " << "config doesn't exist" << std::endl;
@@ -125,5 +120,15 @@ main(int argc, char** argv)
     return 1;
   }
   policyConfig.close();
+  
+  try {
+    boost::asio::io_service::work ioServiceWork(*io_service);
+    io_service->run();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Start IO service or Face failed" << std::endl;
+    return 1;
+  }
+  return 0;
 	return 0;
 }

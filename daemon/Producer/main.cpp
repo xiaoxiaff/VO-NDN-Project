@@ -113,9 +113,8 @@ main(int argc, char** argv)
           if (inputFile.is_open()) {
             std::string content((std::istreambuf_iterator<char>(inputFile)),
                                 (std::istreambuf_iterator<char>()));
-            producer.produce(dataName, "", reinterpret_cast<const uint8_t*>(content.data()), content.size(),
+            producer.produce(interest.getName().getSubName(1,1), reinterpret_cast<const uint8_t*>(content.data()), content.size(),
             [&] (const ndn::Data& data) {
-
               std::cout << "data successfully encrypted" << std::endl;
               face->put(data);
             },
@@ -133,7 +132,6 @@ main(int argc, char** argv)
     return 1;
   }
   policyConfig.close();
-	// set up AA
 
   try {
     boost::asio::io_service::work ioServiceWork(*io_service);

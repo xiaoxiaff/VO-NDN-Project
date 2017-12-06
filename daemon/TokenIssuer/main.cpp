@@ -87,32 +87,6 @@ main(int argc, char** argv)
     printUsage(std::cout, argv[0]);
     return 0;
   }
-  // Import config for token issuer.
-  std::string line;
-  std::ifstream attrConfig1(configFile);
-  if (attrConfig1.is_open())
-  {
-    while (getline(attrConfig1, line))
-    {
-      std::size_t pos = line.find(",");
-      ndn::Name consumerName = line.substr(0, pos);
-      std::string attributes = line.substr(pos+1);
-      std::list<std::string> attrList;
-      boost::split(attrList, attributes, [](char c){return c == ',';});
-      if (!getline(attrConfig1, line))
-      {
-        std::cerr << "ERROR: " << "config format wrong" << std::endl;
-        return 1;
-      }
-      std::cout<<line<<std::endl;
-
-    }
-  } else {
-    std::cerr << "ERROR: " << "config doesn't exist" << std::endl;
-    printUsage(std::cerr, argv[0]);
-    return 1;
-  }
-  attrConfig1.close();
 
   std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
   std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
@@ -122,7 +96,7 @@ main(int argc, char** argv)
   ndn::security::Key key = identity.getDefaultKey();
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
   ndn::ndnabac::TokenIssuer tokenIssuer(cert, *face, keyChain);
-
+  std::string line;
   // Import config for token issuer.
   std::ifstream attrConfig(configFile);
   if (attrConfig.is_open())
@@ -134,8 +108,13 @@ main(int argc, char** argv)
   		std::string attributes = line.substr(pos+1);
   		std::list<std::string> attrList;
   		boost::split(attrList, attributes, [](char c){return c == ',';});
+      std::cout<<"insert consumerName:"<<consumerName;
+      for (auto ele : attrList) {
+          std::cout<<ele;
+      }
+      std::cout<<std::endl;
   		tokenIssuer.insertAttributes(std::pair<ndn::Name, std::list<std::string>>(consumerName, attrList));
-      if (!getline(attrConfig1, line))
+      if (!getline(attrConfig, line))
       {
         std::cerr << "ERROR: " << "config format wrong" << std::endl;
         return 1;
@@ -149,5 +128,13 @@ main(int argc, char** argv)
     return 1;
   }
   attrConfig.close();
+  try {
+    boost::asio::io_service::work ioServiceWork(*io_service);
+    io_service->run();
+  }
+  catch (const std::exception& e) {
+    std::cout << "Start IO service or Face failed" << std::endl;
+    return 1;
+  }
 	return 0;
 }

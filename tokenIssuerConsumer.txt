@@ -1,1 +1,2 @@
-/Consumer1,attr1,attr3
+/Consumer,attr1,attr3
+consumerCert

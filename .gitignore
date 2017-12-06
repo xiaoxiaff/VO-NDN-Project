@@ -1,4 +1,5 @@
 .DS*
+.waf-tools/boost.pyc
 .waf-1*
 .waf3-*
 .lock*

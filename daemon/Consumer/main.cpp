@@ -45,6 +45,8 @@ printUsage(std::ostream& os, const std::string& programName)
      << "(default: " << "/consumerPrefix" << ")\n"
      << "  [--path]    - path to the certificate"
      << "(default: " << "./%consumerPrefix%/cert" << ")\n"
+     << "  [--tokenIssuerName]    - token issuer name\n"
+     << "  [--aname]   - name of attribute authority"
      ;
 }
 
@@ -58,11 +60,13 @@ main(int argc, char** argv)
   std::string consumerName = "/consumerPrefix";
   std::string pathToCert = "."+consumerName+"/cert";
   std::string tokenIssuerName = "/tokenIssuerPrefix";
+  std::string attributeAuthorityName = "/aaPrefix";
   description.add_options()
     ("help,h", "print this help message")
     ("name,n", po::value<std::string>(&consumerName), "Consumer Name")
     ("path,p", po::value<std::string>(&pathToCert), "Path to Cert")
     ("tokenIssuerName,t", po::value<std::string>(&tokenIssuerName), "Token Issuer Name")
+    ("attributeAuthorityName, a", po::value<std::string>(&attributeAuthorityName), "Attribute Authority Name")
     ;
 
   po::variables_map vm;
@@ -94,8 +98,8 @@ main(int argc, char** argv)
   std::ofstream certFile(pathToCert);
   ndn::io::save(cert, certFile);
   certFile.close();
-  ndn::ndnabac::Consumer consumer(cert, *face, keyChain, ndn::Name(consumerName));
-  
+  ndn::ndnabac::Consumer consumer(cert, *face, keyChain, ndn::Name(attributeAuthorityName));
+
   ndn::ndnabacdaemon::IoServiceManager* ioServiceManager = new ndn::ndnabacdaemon::IoServiceManager(*ioService);
   try {
     std::thread m_NetworkThread =
@@ -106,7 +110,7 @@ main(int argc, char** argv)
         return 1;
       }
       std::size_t pos = line.find(",");
-      if (pos == std::string::npos) {   
+      if (pos == std::string::npos) {
         std::cerr << "ERROR: " << "config format error" << std::endl;
         return 1;
       }
@@ -117,6 +121,7 @@ main(int argc, char** argv)
           std::string str;
           for(int i =0;i<sizeof(result);++i)
             str.push_back(result[i]);
+          std::cout<<str<<std::endl;
         },
         [&] (const std::string& err) {
           std::cout << "error occurred" << err << std::endl;
