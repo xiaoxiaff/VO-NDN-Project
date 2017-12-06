@@ -78,7 +78,7 @@ main(int argc, char** argv)
 	std::unique_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
 	std::unique_ptr<ndn::Face> face(new ndn::Face(*io_service));
 	ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
-	// set up AA
+	// set up Data Owner
   ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(dataOwnerName, keyChain);
   ndn::security::Key key = identity.getDefaultKey();
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
@@ -120,7 +120,7 @@ main(int argc, char** argv)
     return 1;
   }
   policyConfig.close();
-  
+
   try {
     boost::asio::io_service::work ioServiceWork(*io_service);
     io_service->run();
@@ -129,6 +129,5 @@ main(int argc, char** argv)
     std::cout << "Start IO service or Face failed" << std::endl;
     return 1;
   }
-  return 0;
 	return 0;
 }

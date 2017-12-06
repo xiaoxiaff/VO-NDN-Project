@@ -89,7 +89,7 @@ main(int argc, char** argv)
 	std::unique_ptr<boost::asio::io_service> ioService(new boost::asio::io_service);
 	std::unique_ptr<ndn::Face> face(new ndn::Face(*ioService));
 	ndn::KeyChain keyChain("pib-memory:", "tpm-memory:");
-	// set up AA
+	// set up Consumer
   ndn::security::Identity identity = ndn::ndnabacdaemon::addIdentity(consumerName, keyChain);
   ndn::security::Key key = identity.getDefaultKey();
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();

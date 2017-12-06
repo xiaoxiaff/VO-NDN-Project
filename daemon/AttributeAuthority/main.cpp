@@ -85,14 +85,8 @@ main(int argc, char** argv)
   ndn::security::v2::Certificate cert = key.getDefaultCertificate();
 
   ndn::ndnabac::AttributeAuthority aa(cert, *face, keyChain);
-
-  std::cout << "before io service" << std::endl;
-
   try {
     boost::asio::io_service::work ioServiceWork(*io_service);
-
-    std::cout << "before run" << std::endl;
-
     io_service->run();
   }
   catch (const std::exception& e) {
